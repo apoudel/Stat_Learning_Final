@@ -1,0 +1,97 @@
+#Aayam Poudel
+#Final Project
+
+library(tidyverse)
+library(broom)
+
+#The working directory. Make sure to modify it when you run your code
+setwd("~/Desktop/Junior Spring/Statistical Learning/Homework/Final Project/")
+
+#First let's import some important info about the stores
+store <- read_csv("store.csv")
+
+#Read the train data
+train <- read_csv("train.csv") 
+
+#Read the test data
+test <- read_csv("test.csv")
+
+#since the store info is relevant to both train and test datasets let's join them to the datasets
+train <- left_join(train,store, by="Store")
+test <- left_join(test,store,by="Store")
+
+
+#Since the dataset is too big, I couldn't do proper conputations so I am going to select a subset
+train <- train %>%
+  sample_frac(0.1)
+
+#Read the sample submissions
+sample_submissions <- read_csv("sample_submission.csv")
+
+
+#1. Exploratory data analysis:
+
+#1.a. EDA on Customers
+#The first way of doing exploratory data analysis is looking at the data. Just looking at a dataset might not give
+#us too much information about the data, but it provides us with some information.
+View(train)
+
+#The number of customers present at that given day might have a correlation with sales. It is definitely worth exploring.
+customers_vs_sales <- ggplot(train, aes(x=Customers, y=Sales)) +
+  geom_point() +
+  geom_smooth()
+customers_vs_sales
+
+#It seems like there is definitey a correlation between Sales and Customer. This is valuable information.
+
+#1.b. EDA on Promo
+#Let's look at the correlation between Sales and whether there was a promo event or not.
+promo_vs_sales <- ggplot(train, aes(x=Promo, y=Sales, group=Promo)) +
+  geom_boxplot() 
+promo_vs_sales
+
+#It's a little hard to understand. Log scale to the rescue!
+promo_vs_sales <- ggplot(train, aes(x=Promo, y=Sales, group=Promo)) +
+  geom_boxplot() +
+  scale_y_log10()
+promo_vs_sales
+
+#Seems like there is some information that promo provides about Sales! 
+
+#1.c. EDA on School Holiday
+
+#Let's look at the correlation between Sales and type of School Holiday
+school_holiday_vs_sales <- ggplot(train, aes(x=SchoolHoliday, y=Sales, group=SchoolHoliday)) +
+  geom_boxplot() 
+school_holiday_vs_sales
+
+
+#1.d EDA on Competitive Stores
+comp_stores <- ggplot(train, aes(x=CompetitionDistance, y=Sales)) +
+  geom_point() +
+  geom_smooth()
+comp_stores
+#DO MORE EDA
+
+
+
+#Before doing anything else I want to fit a regression model just based on a bunch of predictors and see
+#if I can get it submitted on Kaggle properly!
+model_SL <- lm(Sales~Store+Promo+StateHoliday+SchoolHoliday+DayOfWeek, data=train)
+
+fitted_values <- augment(model_SL, newdata = test)
+
+submission_example <- fitted_values %>%
+  mutate (Sales = .fitted) %>%
+  select(Id, Sales)
+
+submission_example %>% 
+  readr::write_csv("submission_example.csv")
+
+
+#It works, so now we can go ahead and fit some models and do cross validation on them
+
+
+
+
+
