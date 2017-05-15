@@ -7,7 +7,7 @@ library(broom)
 #sexy themes 
 library(ggthemes)
 
-#Id - an Id that represents a (Store, Date) duple within the test set
+# Id - an Id that represents a (Store, Date) duple within the test set
 # Store - a unique Id for each store
 # Sales - the turnover for any given day (this is what you are predicting)
 # Customers - the number of customers on a given day
